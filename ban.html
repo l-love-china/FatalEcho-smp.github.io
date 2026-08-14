@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚔️ 生命窃取 · SMP | 封禁名单</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0b0a0a;
+            background-image: radial-gradient(circle at 10% 20%, #1f1412 0%, #0a0808 90%);
+            font-family: 'Segoe UI', 'PingFang SC', Roboto, 'Helvetica Neue', sans-serif;
+            display: flex;
+            justify-content: center;
+            padding: 2rem 1.5rem;
+            min-height: 100vh;
+            color: #eae2d7;
+            line-height: 1.6;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* 流血装饰动画 */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 120%;
+            background-image:
+                radial-gradient(circle at 15% 10%, rgba(138,40,30,0.08) 0%, transparent 40%),
+                radial-gradient(circle at 85% 70%, rgba(120,30,22,0.06) 0%, transparent 35%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* 飘落微光粒子 */
+        .particle-layer {
+            position: fixed;
+            inset:0;
+            pointer-events:none;
+            z-index:0;
+            overflow:hidden;
+        }
+        .particle {
+            position:absolute;
+            width:3px;
+            height:3px;
+            background:rgba(217,137,94,0.35);
+            border-radius:50%;
+            animation: fall 14s linear infinite;
+        }
+        @keyframes fall {
+            0%{transform:translateY(-10px);opacity:0;}
+            10%{opacity:1;}
+            90%{opacity:0.7;}
+            100%{transform:translateY(105vh);opacity:0;}
+        }
+
+        /*美化滚动条 和主站保持一致*/
+        ::-webkit-scrollbar {
+            width: 8px;
+            height:8px;
+        }
+        ::-webkit-scrollbar-track {
+            background:#0b0a0a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background:#4f3226;
+            border-radius:4px;
+        }
+
+        .container {
+            max-width: 860px;
+            width: 100%;
+            background: rgba(18, 14, 13, 0.92);
+            backdrop-filter: blur(2px);
+            border: 1px solid #5e3a2e;
+            border-radius: 32px;
+            padding: 2.5rem 2.2rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 0 1px #3f2a1f inset;
+            position: relative;
+            z-index:1;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #7a4a36;
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .header::after {
+            content: "🩸";
+            position: absolute;
+            bottom: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f1412;
+            padding: 0 12px;
+            font-size: 1.6rem;
+            letter-spacing: 4px;
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #f5d6b3, #e6b28e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header .sub {
+            color: #b18a78;
+            font-size: 1rem;
+            margin-top:6px;
+            letter-spacing:2px;
+        }
+
+        .back-link{
+            display:inline-block;
+            margin-bottom:1rem;
+            color:#b18a78;
+            text-decoration:none;
+            font-size:0.9rem;
+        }
+        .back-link:hover{
+            color:#f5d6b3;
+            text-decoration:underline;
+        }
+
+        .search-wrap{
+            margin-bottom:1.5rem;
+        }
+        #searchInput{
+            width:100%;
+            background:#15100e;
+            border:1px solid #3f2a1f;
+            border-radius:12px;
+            padding:0.8rem 1rem;
+            color:#eae2d7;
+            font-size:0.95rem;
+        }
+        #searchInput:focus{
+            outline:none;
+            border-color:#b35f3e;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            margin: 0.8rem 0 1.5rem 0;
+            border-radius: 16px;
+            border: 1px solid #2d1f19;
+            background: #15100e;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.92rem;
+        }
+
+        th {
+            background: #241b17;
+            color: #f0d5be;
+            font-weight: 600;
+            padding: 12px 14px;
+            text-align: left;
+            border-bottom: 2px solid #4f3226;
+        }
+
+        td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #261d19;
+            color: #d6c8bc;
+        }
+        tr:last-child td{
+            border-bottom:none;
+        }
+        tr:hover{
+            background:#1b1411;
+        }
+
+        .tag-perm{
+            color:#ff847c;
+            font-weight:600;
+        }
+        .tag-temp{
+            color:#f5b68a;
+        }
+        .tag-expired{
+            color:#777;
+        }
+
+        .loading-tip,.empty-tip{
+            text-align:center;
+            padding:2rem;
+            color:#a0887a;
+        }
+
+        .footer-motto {
+            margin-top: 2.5rem;
+            text-align: center;
+            padding-top: 1.5rem;
+            border-top: 1px solid #32221b;
+            font-size: 1rem;
+            letter-spacing: 1px;
+            color: #c7aa96;
+            font-weight: 300;
+        }
+        .small-print {
+            margin-top: 0.6rem;
+            font-size: 0.75rem;
+            color: #6a5850;
+            text-align: center;
+            letter-spacing: 0.3px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 1.5rem 1.2rem;
+            }
+            .header h1 {
+                font-size: 1.7rem;
+            }
+            th,td{
+                padding:10px 8px;
+                font-size:0.82rem;
+            }
+        }
+        @media (max-width:420px){
+            .container{padding:1rem 0.8rem;}
+            .header h1{font-size:1.4rem;}
+        }
+    </style>
+</head>
+<body>
+<div class="particle-layer" id="particleBox"></div>
+    <div class="container">
+        <a class="back-link" href="./index.html">← 返回服务器总则</a>
+        <div class="header">
+            <h1>⚔️ 封禁名单</h1>
+            <div class="sub">生命窃取 SMP · Ban List</div>
+        </div>
+
+        <div class="search-wrap">
+            <input id="searchInput" placeholder="🔍 输入玩家名搜索封禁记录...">
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>玩家ID</th>
+                        <th>违规类型</th>
+                        <th>违规次数</th>
+                        <th>封禁到期</th>
+                        <th>状态</th>
+                    </tr>
+                </thead>
+                <tbody id="banTableBody">
+                    <tr><td colspan="5" class="loading-tip">加载 ban.json 数据中…</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="footer-motto">
+            违背规则，将被剥夺继续游戏的资格 🩸
+        </div>
+        <div class="small-print">
+            数据来源：FatalEcho‑smp.github.io/ban.json
+        </div>
+    </div>
+
+<script>
+//生成背景微光粒子装饰
+(function createParticle(){
+    const box = document.getElementById('particleBox');
+    const count = 22;
+    for(let i=0;i<count;i++){
+        const el = document.createElement('div');
+        el.className="particle";
+        el.style.left = Math.random()*100 +"%";
+        el.style.animationDelay = Math.random()*14 +"s";
+        el.style.animationDuration = (10 + Math.random()*12)+"s";
+        box.appendChild(el);
+    }
+})();
+
+// 本地兜底示例数据，当github.io ban.json加载失败时展示
+const fallbackBanData = {
+    "bans":[
+        {
+            "player":"Example_User",
+            "reason":"外挂-飞行作弊",
+            "count":2,
+            "endTime":"2026‑09‑01T12:00:00",
+            "permanent":false
+        },
+        {
+            "player":"BadPlayer01",
+            "reason":"恶意卡服攻击服务器",
+            "count":1,
+            "endTime":null,
+            "permanent":true
+        }
+    ]
+};
+
+let banList = [];
+const tableBody = document.getElementById("banTableBody");
+const searchInput = document.getElementById("searchInput");
+
+// 渲染表格
+function render(list){
+    if(!list || list.length===0){
+        tableBody.innerHTML = `<tr><td colspan="5" class="empty-tip">暂无封禁记录</td></tr>`;
+        return;
+    }
+    let html = "";
+    list.forEach(item=>{
+        let statusText,statusClass;
+        let endDisplay;
+        if(item.permanent){
+            statusText="永久封禁";
+            statusClass="tag-perm";
+            endDisplay="——";
+        }else{
+            const end = new Date(item.endTime);
+            const now = new Date();
+            if(end < now){
+                statusText="已过期";
+                statusClass="tag-expired";
+            }else{
+                statusText="封禁中";
+                statusClass="tag-temp";
+            }
+            endDisplay = end.toLocaleString("zh‑CN");
+        }
+        html += `
+        <tr>
+            <td>${escapeHtml(item.player)}</td>
+            <td>${escapeHtml(item.reason)}</td>
+            <td>${item.count}</td>
+            <td>${endDisplay}</td>
+            <td><span class="${statusClass}">${statusText}</span></td>
+        </tr>
+        `;
+    });
+    tableBody.innerHTML = html;
+}
+
+//简单XSS转义
+function escapeHtml(str){
+    if(!str) return "";
+    return String(str)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;");
+}
+
+//搜索过滤
+function filterByKeyword(keyword){
+    if(!keyword){
+        render(banList);
+        return;
+    }
+    const kw = keyword.toLowerCase();
+    const filtered = banList.filter(x=> x.player.toLowerCase().includes(kw));
+    render(filtered);
+}
+
+//加载远程ban.json
+async function loadBanJson(){
+    try{
+        //github pages 同域，直接请求根目录ban.json
+        const resp = await fetch("./ban.json",{cache:"no‑cache"});
+        if(!resp.ok) throw new Error("http error");
+        const json = await resp.json();
+        banList = json.bans || [];
+    }catch(err){
+        console.warn("无法加载远程ban.json，使用本地兜底数据",err);
+        banList = fallbackBanData.bans;
+    }
+    render(banList);
+}
+
+searchInput.addEventListener("input",e=>{
+    filterByKeyword(e.target.value.trim());
+});
+
+loadBanJson();
+</script>
+</body>
+</html>
